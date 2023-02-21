@@ -1,5 +1,5 @@
 # clothing-company
-analyzing clothing company sales performance
+analyzing clothing company business performance
 
 using MS. SQL SERVER STUDIO
 
