@@ -22,10 +22,20 @@ steps:
               <summary>total quantity sold for all products</summary>
               <pre>select SUM(qty) as total_all_product_sold
               from clothing_sales;</pre>
-              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.%20total%20quantity%20sold%20for%20all%20products.jpg">
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.1%20total%20quantity%20sold%20for%20all%20products.jpg">
               </details>
 
           2. What is the total generated revenue for all products before discounts?
+              <details>
+              <summary>total revenue for all products before discounts</summary>
+              <pre>sselect sum(qty*price) as total_revenue_before_discounts
+              from clothing_sales;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.2.%20total%20revenue%20for%20all%20products%20before%20discounts.jpg">
+              </details>
+          
+          
+          
           3. What was the total discount amount for all products?
 
 
