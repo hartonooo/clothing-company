@@ -135,14 +135,110 @@ steps:
               <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.6%20average%20revenue%20for%20member%20transactions%20and%20non-member%20transactions.jpg">
               </details>
 
-    3. Product Analysis
-      1. What are the top 3 products by total revenue before discount?
-      2. What is the total quantity, revenue and discount for each segment?
-      3. What is the top selling product for each segment?
-      4. What is the total quantity, revenue and discount for each category?
-      5. What is the top selling product for each category?
-      6. What is the percentage split of revenue by product for each segment?
-      7. What is the percentage split of revenue by segment for each category?
-      8. What is the percentage split of total revenue by category?
-      9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
-      10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+
+      3. Product Analysis
+    
+          1. What are the top 3 products by total revenue before discount?          
+              <details>
+              <summary>top 3 products by total revenue before discount</summary>
+              <pre>
+              select top 3 s.prod_id, 
+                pd.product_name, 
+                sum(s.qty*s.price) as total_revenue_before_discount
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by s.prod_id, pd.product_name
+              order by sum(s.qty*s.price) desc;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.1%20top%203%20products%20by%20total%20revenue%20before%20discount.jpg">
+              </details>             
+          
+          
+          2. What is the total quantity, revenue and discount for each segment?
+              <details>
+              <summary>total quantity, revenue and discount for each segment</summary>
+              <pre>
+              with satu as (select pd.segment_name, 
+                      s.qty, 
+                      s.price, 
+                      s.discount
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id)</br>
+              select segment_name, SUM(qty) as total_quantity, 
+                  SUM(qty*price) as total_revenue_before_disc, -- before discount
+                  SUM(qty*price*(1-(discount/100.0))) as total_revenue_after_disc,  -- after discount
+                  SUM(qty*price*(discount/100.0)) as total_discount
+              from satu
+              group by segment_name;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.2%20total%20quantity%2C%20revenue%20and%20discount%20for%20each%20segment.jpg">
+              </details>  
+         
+         
+          3. What is the top selling product for each segment?
+              <details>
+              <summary>top selling product for each segment</summary>
+              <pre>
+              with satu as (select pd.segment_name, 
+                  pd.product_name, 
+                  sum(s.qty) as total_selling
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.segment_name, pd.product_name),</br>
+              dua as (select *, RANK() over(partition by segment_name order by total_selling desc) as rn
+              from satu)</br>
+              select segment_name, product_name, total_selling
+              from dua
+              where rn = 1;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.3%20top%20selling%20product%20for%20each%20segment.jpg">
+              </details>  
+          
+          
+          4. What is the total quantity, revenue and discount for each category?
+              <details>
+              <summary>total quantity, revenue and discount for each category</summary>
+              <pre>
+              select pd.category_name, 
+                  sum(s.qty) as total_quantity, 
+                  sum(s.qty*s.price) as total_revenue_before_discount, 
+                  SUM(s.qty*s.price*(1-(s.discount/100.0))) as total_revenue_after_disc,
+                  SUM(s.qty*s.price*(s.discount/100.0)) as total_discount
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.category_name;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.4%20total%20quantity%2C%20revenue%20and%20discount%20for%20each%20category.jpg">
+              </details>  
+          
+          
+          5. What is the top selling product for each category?
+              <details>
+              <summary>top selling product for each category</summary>
+              <pre>
+              with satu as (select pd.category_name, 
+                      pd.product_name, 
+                      sum(s.qty) as total_selling
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.category_name, pd.product_name),</br>
+              dua as (select *, RANK() over(partition by category_name order by total_selling desc) as rn
+              from satu)</br>
+              select category_name, product_name, total_selling
+              from dua
+              where rn = 1;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.5%20top%20selling%20product%20for%20each%20category.jpg">
+              </details>  
+          
+          
+          6. What is the percentage split of revenue by product for each segment?
+          7. What is the percentage split of revenue by segment for each category?
+          8. What is the percentage split of total revenue by category?
+          9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+          10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
