@@ -33,20 +33,107 @@ steps:
               </pre>
               <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.2.%20total%20revenue%20for%20all%20products%20before%20discounts.jpg">
               </details>
-          
-          
-          
+                            
           3. What was the total discount amount for all products?
-
-
-    2. Transaction Analysis
-      1. How many unique transactions were there?
-      2. What is the average unique products purchased in each transaction?
-      3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
-      4. What is the average discount value per transaction?
-      5. What is the percentage split of all transactions for members vs non-members? 
-      6. What is the average revenue for member transactions and non-member transactions?
-
+              <details>
+              <summary>total discount amount for all products</summary>
+              <pre>
+              select sum(qty*(discount/100.0 * price)) as total_discount_amount
+              from clothing_sales;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.3%20total%20discount%20amount%20for%20all%20products.jpg">
+              </details>
+   
+      2. Transaction Analysis
+    
+          1. How many unique transactions were there?
+              <details>
+              <summary>amount of unique transactions</summary>
+              <pre>
+              select count(distinct txn_id) as unique_trx
+              from clothing_sales;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.1%20amount%20of%20unique%20transactions.jpg">
+              </details>
+             
+          2. What is the average unique products purchased in each transaction?
+              <details>
+              <summary>average unique products purchased in each transaction</summary>
+              <pre>
+              with satu as (select txn_id, COUNT(distinct prod_id) as count_unique_product
+              from clothing_sales
+              group by txn_id)</br>
+              select AVG(count_unique_product) as avg_count_unique_product
+              from satu;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.2%20average%20unique%20products%20purchased%20in%20each%20transaction.jpg">
+              </details>
+          
+          
+          3. What are the 25th, 50th and 75th percentile values for the revenue per transaction?
+              <details>
+              <summary>25th, 50th and 75th percentile values for the revenue per transaction</summary>
+              <pre>
+              with satu as (select txn_id, sum(qty * (price-(discount*price/100.0))) as revenue_per_trx
+              from clothing_sales
+              group by txn_id)</br>
+              select distinct PERCENTILE_disc(0.25) within group (order by revenue_per_trx) over() as percentile_25th,
+              PERCENTILE_disc(0.5) within group (order by revenue_per_trx) over() as percentile_50th, 
+              PERCENTILE_disc(0.75) within group (order by revenue_per_trx) over() as percentile_75th
+              from satu;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.3%2025th%2C%2050th%20and%2075th%20percentile%20values%20for%20the%20revenue%20per%20transaction.jpg">
+              </details>
+         
+         
+          4. What is the average discount value per transaction?
+              <details>
+              <summary>average discount value per transaction</summary>
+              <pre>
+              select txn_id, 
+                AVG(discount) as avg_discount_per_trx
+              from clothing_sales
+              group by txn_id
+              order by AVG(discount) desc;
+              </pre>
+              <p>vary from 0 to 24 percent</p>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.4%20average%20discount%20value%20per%20transaction.jpg">
+              </details>
+          
+         
+          5. What is the percentage split of all transactions for members vs non-members? 
+              <details>
+              <summary>percentage split of all transactions for members vs non-members</summary>
+              <pre>
+              with member as (select COUNT(distinct txn_id) as member
+                from clothing_sales
+                where member = 't'),</br>
+              non_member as (select COUNT(distinct txn_id) as non_member
+                from clothing_sales
+                where member = 'f'),</br>
+              altogether as (select COUNT(distinct txn_id) as member
+                from clothing_sales
+              )</br>
+              select (select * from member) * 100.0 / (select * from altogether) as pct_member, (select * from non_member) * 100.0 / (select * from altogether) as pct_non_member;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.5%20percentage%20split%20of%20all%20transactions%20for%20members%20vs%20non-members.jpg">
+              </details>
+         
+         
+          6. What is the average revenue for member transactions and non-member transactions?
+              <details>
+              <summary>average revenue for member transactions and non-member transactions</summary>
+              <pre>
+              with satu as (select *, qty * (price*(1-(discount/100.0))) as rev
+                from clothing_sales),</br>
+              member as (select member, AVG(rev) as avg_rev_member from satu where member = 't' group by member),</br>
+              non_member as (select member, AVG(rev) as avg_rev_non_member from satu where member = 'f' group by member)</br>
+              select avg_rev_member, avg_rev_non_member
+              from member, non_member;
+              </pre>
+              <p>calculate after discount</p>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/2.6%20average%20revenue%20for%20member%20transactions%20and%20non-member%20transactions.jpg">
+              </details>
 
     3. Product Analysis
       1. What are the top 3 products by total revenue before discount?
