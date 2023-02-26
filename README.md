@@ -12,23 +12,21 @@ steps:
       <summary>table</summary>
       <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.%20table.jpg">
       </details>
-  
+
   3. analysis:
   
-    1. High Level Sales Analysis
-      1. What was the total quantity sold for all products?
-          
-      <details>
-      <summary>total quantity sold for all products</summary>
-      <pre>
-      select SUM(qty) as total_all_product_sold
-      from clothing_sales;
-      </pre>
-      <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.%20total%20quantity%20sold%20for%20all%20products.jpg">
-      </details>
-      
-      2. What is the total generated revenue for all products before discounts?
-      3. What was the total discount amount for all products?
+      1. High Level Sales Analysis    
+        
+          1. What was the total quantity sold for all products?      
+              <details>
+              <summary>total quantity sold for all products</summary>
+              <pre>select SUM(qty) as total_all_product_sold
+              from clothing_sales;</pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/1.%20total%20quantity%20sold%20for%20all%20products.jpg">
+              </details>
+
+          2. What is the total generated revenue for all products before discounts?
+          3. What was the total discount amount for all products?
 
 
     2. Transaction Analysis
