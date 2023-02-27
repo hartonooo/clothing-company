@@ -311,8 +311,58 @@ steps:
               </details> 
           
           
-          9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
-          
+          9. What is the total transaction “penetration” for each product? 
+              (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+              <details>
+              <summary>total transaction “penetration” for each product</summary>
+              <pre>
+              with satu as (select txn_id, prod_id, qty		
+              from clothing_sales),</br>
+              dua as (select prod_id, COUNT(distinct txn_id) as number_of_trx
+              from satu
+              group by prod_id),</br>
+              tiga as (select prod_id, COUNT(distinct txn_id) as number_of_1_qty
+              from satu
+              where qty = 1
+              group by prod_id)</br>
+              select t.prod_id, 
+                  t.number_of_1_qty, 
+                  d.number_of_trx,
+                  round(t.number_of_1_qty * 1.0 / d.number_of_trx, 2) as penetration
+              from tiga t
+              join dua d
+              on t.prod_id = d.prod_id;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.9%20total%20transaction%20%E2%80%9Cpenetration%E2%80%9D%20for%20each%20product.jpg">
+              </details> 
           
           
           10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+              <details>
+              <summary>most common combination</summary>
+              <pre>
+              with satu as (select prod_id, qty, txn_id
+              from clothing_sales
+              where txn_id in (select distinct txn_id from clothing_sales where qty = 1)),</br>
+              dua as (select s1.prod_id as prod_id_1, 
+                  s2.prod_id as prod_id_2, 
+                  s3.prod_id as prod_id_3, 
+                  CONCAT(s1.prod_id, ' - ', s2.prod_id, ' - ', s3.prod_id) as mix
+              from satu s1
+              join satu s2 on s1.prod_id < s2.prod_id and s1.txn_id = s2.txn_id
+              join satu s3 on s2.prod_id < s3.prod_id and s2.txn_id = s3.txn_id
+              where s1.qty = 1 and s2.qty > 1 and s3.qty > 1)</br>
+              select prod_id_1, 
+                  prod_id_2, 
+                  prod_id_3, 
+                  mix, 
+                  COUNT(mix) as cnt_common
+              from dua
+              group by prod_id_1,	prod_id_2, prod_id_3, mix
+              order by COUNT(mix) desc;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.10%20most%20common%20combination.jpg">
+              </details> 
+
+
+
