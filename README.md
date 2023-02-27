@@ -238,7 +238,81 @@ steps:
           
           
           6. What is the percentage split of revenue by product for each segment?
+              <details>
+              <summary>percentage split of revenue by product for each segment</summary>
+              <pre>
+              with satu as (select pd.segment_name, 
+                  pd.product_name, 
+                  sum(s.qty*s.price) as total_revenue_before_discount, 
+                  SUM(s.qty*s.price*(1-(s.discount/100.0))) as total_revenue_after_disc		
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.segment_name, pd.product_name)</br>
+              select segment_name, 
+                  product_name, 
+                  total_revenue_before_discount, 
+                  round(total_revenue_before_discount * 100.0 / SUM(total_revenue_before_discount) over(partition by segment_name), 0) as pct_before_disc,
+                  total_revenue_after_disc,
+                  round(total_revenue_after_disc * 100.0 / SUM(total_revenue_after_disc) over(partition by segment_name), 0) as pct_after_disc
+              from satu;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.6%20percentage%20split%20of%20revenue%20by%20product%20for%20each%20segment.jpg">
+              </details> 
+          
+          
           7. What is the percentage split of revenue by segment for each category?
+              <details>
+              <summary>percentage split of revenue by segment for each category</summary>
+              <pre>
+              with satu as (select pd.category_name,
+                  pd.segment_name, 
+                  sum(s.qty*s.price) as total_revenue_before_discount, 
+                  SUM(s.qty*s.price*(1-(s.discount/100.0))) as total_revenue_after_disc		
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.category_name, pd.segment_name)</br>
+              select category_name, 
+                  segment_name, 
+                  total_revenue_before_discount, 
+                  round(total_revenue_before_discount * 100.0 / SUM(total_revenue_before_discount) over(partition by category_name), 0) as pct_before_disc,
+                  total_revenue_after_disc,
+                  round(total_revenue_after_disc * 100.0 / SUM(total_revenue_after_disc) over(partition by category_name), 0) as pct_after_disc
+              from satu;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.7%20percentage%20split%20of%20revenue%20by%20segment%20for%20each%20category.jpg">
+              </details> 
+          
+          
           8. What is the percentage split of total revenue by category?
+              <details>
+              <summary>percentage split of total revenue by category</summary>
+              <pre>
+              with satu as (select pd.category_name,
+                  sum(s.qty*s.price) as total_revenue_before_discount, 
+                  SUM(s.qty*s.price*(1-(s.discount/100.0))) as total_revenue_after_disc		
+              from clothing_sales s
+              join clothing_product_details pd
+              on s.prod_id = pd.product_id
+              group by pd.category_name),</br>
+              dua as (select SUM(total_revenue_before_discount) as total_before
+              from satu),</br>
+              tiga as (select SUM(total_revenue_after_disc) as total_after
+              from satu)</br>
+              select category_name, 
+                  total_revenue_before_discount, 
+                  round(total_revenue_before_discount * 100.0/ (select total_before from dua), 0) as pct_revenue_before_disc,
+                  total_revenue_after_disc,
+                  round(total_revenue_after_disc * 100.0 / (select total_after from tiga), 0) as pct_revenue_after_disc
+              from satu;
+              </pre>
+              <img src="https://github.com/mas-tono/clothing-company/blob/main/image/3.8%20percentage%20split%20of%20total%20revenue%20by%20category.jpg">
+              </details> 
+          
+          
           9. What is the total transaction “penetration” for each product? (hint: penetration = number of transactions where at least 1 quantity of a product was purchased divided by total number of transactions)
+          
+          
+          
           10. What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
